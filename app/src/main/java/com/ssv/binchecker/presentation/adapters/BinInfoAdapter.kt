@@ -12,6 +12,9 @@ import com.ssv.binchecker.presentation.diffUtils.DescriptionContentDiffCallback
 import com.ssv.binchecker.presentation.viewHolders.BinInfoViewHolder
 
 class BinInfoAdapter: ListAdapter<DescriptionContent, BinInfoViewHolder>(DescriptionContentDiffCallback()) {
+
+    var clickListener: ((DescriptionContent)->Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BinInfoViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ItemInfoBinding.inflate(inflater, parent, false)
@@ -20,6 +23,11 @@ class BinInfoAdapter: ListAdapter<DescriptionContent, BinInfoViewHolder>(Descrip
 
     override fun onBindViewHolder(holder: BinInfoViewHolder, position: Int) {
         val item = getItem(position)
+        setupClickListener(holder, item)
+        setupView(holder, item)
+    }
+
+    private fun setupView(holder: BinInfoViewHolder, item: DescriptionContent){
         with(holder.binding){
             descriptionItem.text = item.description
             contentItem.text = item.content
@@ -41,6 +49,14 @@ class BinInfoAdapter: ListAdapter<DescriptionContent, BinInfoViewHolder>(Descrip
         with(holder.binding.contentItem){
             setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.black))
             paintFlags = holder.binding.contentItem.paintFlags or Paint.ANTI_ALIAS_FLAG
+        }
+    }
+
+    private fun setupClickListener(holder: BinInfoViewHolder, item: DescriptionContent){
+        holder.binding.contentItem.setOnClickListener {
+            if (item.isClickable){
+                clickListener?.invoke(item)
+            }
         }
     }
 
