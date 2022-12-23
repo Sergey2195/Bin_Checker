@@ -6,6 +6,7 @@ import com.ssv.binchecker.di.modules.DataModule
 import com.ssv.binchecker.di.modules.NetworkModule
 import com.ssv.binchecker.di.modules.ViewModelModule
 import com.ssv.binchecker.presentation.MainActivity
+import com.ssv.binchecker.presentation.fragments.BinInfoFragment
 import com.ssv.binchecker.presentation.fragments.InitialFragment
 import dagger.BindsInstance
 import dagger.Component
@@ -18,6 +19,7 @@ interface ApplicationComponent {
     fun injectApplication(app: BinApp)
     fun injectInitialFragment(initialFragment: InitialFragment)
     fun injectMainActivity(activity: MainActivity)
+    fun injectBinInfoFragment(binInfoFragment: BinInfoFragment)
 
     @Component.Factory
     interface Factory{
