@@ -3,22 +3,28 @@ package com.ssv.binchecker.presentation.fragments
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.ssv.binchecker.BinApp
 import com.ssv.binchecker.R
 import com.ssv.binchecker.databinding.FragmentInitialBinding
 import com.ssv.binchecker.domain.*
+import com.ssv.binchecker.presentation.adapters.BinHistoryAdapter
 import com.ssv.binchecker.presentation.viewModels.InitialViewModel
 import com.ssv.binchecker.presentation.viewModelsFactory.ViewModelsFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -32,6 +38,7 @@ class InitialFragment : Fragment() {
     private val viewModel by lazy {
         ViewModelProvider(this, viewModelFactory)[InitialViewModel::class.java]
     }
+    private lateinit var adapter: BinHistoryAdapter
 
     private val component by lazy {
         ((requireActivity().application) as BinApp).component
@@ -53,7 +60,40 @@ class InitialFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
+        setupRecyclerView()
+        setupKeyboardClickListener()
         loadingState(false)
+    }
+
+    private fun setupKeyboardClickListener() {
+        binding.inputEditText.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH){
+                nextButtonClicked()
+                return@setOnEditorActionListener true
+            }else{
+                return@setOnEditorActionListener false
+            }
+        }
+    }
+
+    private fun setupRecyclerView() {
+        adapter = BinHistoryAdapter()
+        binding.historyRv.adapter = adapter
+        binding.historyRv.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        loadHistory()
+        adapter.clickListener = {
+            binding.inputEditText.setText(it.id)
+            binding.nextButton.performClick()
+        }
+    }
+
+    private fun loadHistory(){
+        lifecycleScope.launch(Dispatchers.IO){
+            val list = viewModel.loadHistory()
+            withContext(Dispatchers.Main){
+                adapter.submitList(list)
+            }
+        }
     }
 
     private fun checkResult(res: BinState){
@@ -94,13 +134,16 @@ class InitialFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.nextButton.setOnClickListener {
-            val text = binding.inputEditText.text.toString()
-            sendToViewModel(text)
-            hideKeyboardFrom(requireContext(), requireView())
-            lifecycleScope.launch {
-                viewModel.getInfoFlow().collect() {
-                    checkResult(it)
-                }
+            nextButtonClicked()
+        }
+    }
+    private fun nextButtonClicked(){
+        val text = binding.inputEditText.text.toString()
+        sendToViewModel(text)
+        hideKeyboardFrom(requireContext(), requireView())
+        lifecycleScope.launch {
+            viewModel.getInfoFlow().collect() {
+                checkResult(it)
             }
         }
     }

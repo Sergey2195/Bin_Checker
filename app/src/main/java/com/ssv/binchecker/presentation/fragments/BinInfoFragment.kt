@@ -150,10 +150,6 @@ class BinInfoFragment : Fragment() {
         ActivityCompat.requestPermissions(requireActivity(), permission, 100)
     }
 
-    private fun log(str: String){
-        Log.i("TAG", str)
-    }
-
     companion object {
 
         private const val BIN_INFO = "Bin Info"
