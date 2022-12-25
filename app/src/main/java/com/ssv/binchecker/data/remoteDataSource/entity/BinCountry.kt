@@ -19,8 +19,8 @@ data class BinCountry(
     var currency: String? = null,
 
     @SerializedName("latitude")
-    var latitude: Int? = null,
+    var latitude: Double? = null,
 
     @SerializedName("longitude")
-    var longitude: Int? = null
+    var longitude: Double? = null
 )

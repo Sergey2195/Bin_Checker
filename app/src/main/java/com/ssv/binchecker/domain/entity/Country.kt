@@ -10,6 +10,6 @@ data class Country(
     var name: String? = null,
     var emoji: String? = null,
     var currency: String? = null,
-    var latitude: Int? = null,
-    var longitude: Int? = null
+    var latitude: Double? = null,
+    var longitude: Double? = null
 ): Parcelable
