@@ -19,14 +19,12 @@ import kotlinx.coroutines.CoroutineScope
 interface ApplicationComponent {
     fun injectApplication(app: BinApp)
     fun injectInitialFragment(initialFragment: InitialFragment)
-    fun injectMainActivity(activity: MainActivity)
     fun injectBinInfoFragment(binInfoFragment: BinInfoFragment)
 
     @Component.Factory
     interface Factory{
         fun create(
-            @BindsInstance app: Application,
-            @BindsInstance coroutineScope: CoroutineScope
+            @BindsInstance app: Application
         ):ApplicationComponent
     }
 }

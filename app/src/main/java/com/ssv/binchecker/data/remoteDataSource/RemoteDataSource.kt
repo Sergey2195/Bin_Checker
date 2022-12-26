@@ -1,12 +1,10 @@
 package com.ssv.binchecker.data.remoteDataSource
 
-import android.util.Log
-import com.ssv.binchecker.data.remoteDataSource.apiCall.BinApiCall
 import com.ssv.binchecker.data.mappers.Mapper
+import com.ssv.binchecker.data.remoteDataSource.apiCall.BinApiCall
 import com.ssv.binchecker.domain.BinFailure
 import com.ssv.binchecker.domain.BinState
 import com.ssv.binchecker.domain.BinSuccess
-import java.lang.Exception
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(
@@ -19,8 +17,7 @@ class RemoteDataSource @Inject constructor(
             val response = apiCall.loadInfo(bin)
             val binInfo = mapper.binResponseToBinInfo(response)
             BinSuccess(binInfo)
-        }catch (e:Exception){
-            Log.i("TAG", e.toString())
+        } catch (e: Exception) {
             BinFailure(e)
         }
     }

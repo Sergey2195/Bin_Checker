@@ -10,15 +10,16 @@ import com.ssv.binchecker.domain.useCases.ClearInfoFlowUseCase
 import com.ssv.binchecker.domain.useCases.GetHistoryOfRequestsUseCase
 import com.ssv.binchecker.domain.useCases.GetInfoFlowUseCase
 import com.ssv.binchecker.domain.useCases.LoadBinInfoUseCase
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import javax.inject.Inject
 
+/***
+ * view model of the starter framgent interacting with the repository
+ */
+
 class InitialViewModel @Inject constructor(
     private val loadBinInfoUseCase: LoadBinInfoUseCase,
-    private val appScope: CoroutineScope,
     private val getInfoFlowUseCase: GetInfoFlowUseCase,
     private val clearInfoFlowUseCase: ClearInfoFlowUseCase,
     private val getHistoryOfRequestsUseCase: GetHistoryOfRequestsUseCase,
@@ -31,16 +32,16 @@ class InitialViewModel @Inject constructor(
     suspend fun loadHistory(): List<BinHistory> {
         val strings = getHistoryOfRequestsUseCase.invoke()
         val resultList = arrayListOf<BinHistory>()
-        for (s in strings){
+        for (s in strings) {
             resultList.add(BinHistory(s))
         }
         return resultList
     }
 
     fun showError(binFailure: BinFailure): Int {
-        when (binFailure.e) {
-            is HttpException -> return R.string.notFounded
-            else -> return R.string.connectionError
+        return when (binFailure.e) {
+            is HttpException -> R.string.notFounded
+            else -> R.string.connectionError
         }
     }
 
@@ -48,9 +49,7 @@ class InitialViewModel @Inject constructor(
         return getInfoFlowUseCase.invoke()
     }
 
-    fun sendBin(bin: String) {
-        appScope.launch {
-            loadBinInfoUseCase.invoke(BinSource(bin))
-        }
+    suspend fun sendBin(bin: String) {
+        loadBinInfoUseCase.invoke(BinSource(bin))
     }
 }

@@ -75,10 +75,12 @@ class BinInfoFragment : Fragment() {
         prepareRecyclerView()
     }
 
+    //set text of bin number
     private fun prepareViews() {
         binding.binNumber.text = binNumber
     }
 
+    //settings recyclerView
     private fun prepareRecyclerView() {
         adapter = BinInfoAdapter()
         binding.infoRv.adapter = adapter
@@ -89,6 +91,7 @@ class BinInfoFragment : Fragment() {
         setupClickListenersRV(list)
     }
 
+    //setupClickListeners
     private fun setupClickListenersRV(list: List<DescriptionContent>){
         adapter.clickListener = {
             when (it.description){
@@ -100,17 +103,17 @@ class BinInfoFragment : Fragment() {
         }
     }
 
+    //opens an application that can open a web page
     private fun goToUrl(content: String) {
         val intent = Intent(Intent.ACTION_VIEW)
         val parsedContent = if (!content.startsWith("http://") && !content.startsWith("https://")){
             "http://$content"
-        }else{
-            content
-        }
+        }else content
         intent.data = Uri.parse(parsedContent)
         startActivity(Intent.createChooser(intent,"Choose browser"))
     }
 
+    //all fields are processed to find the latitude and longitude
     private fun transformList(list: List<DescriptionContent>){
         var lat = "0"
         var long = "0"
@@ -125,12 +128,13 @@ class BinInfoFragment : Fragment() {
         openMap(lat, long)
     }
 
+    //opens an application map
     private fun openMap(lat:String, long:String){
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:$lat,$long"))
         startActivity(intent)
     }
 
-
+    //it checks if there is permission to make calls, if not, then permission is requested. If yes, a call is made.
     private fun phoneCall(number: String){
         if (checkPermission()){
             val intent = Intent(Intent.ACTION_CALL)
@@ -141,6 +145,7 @@ class BinInfoFragment : Fragment() {
         }
     }
 
+    //check permission
     private fun checkPermission():Boolean{
         return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
     }

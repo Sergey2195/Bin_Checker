@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import com.ssv.binchecker.di.ViewModelKey
 import com.ssv.binchecker.presentation.viewModels.BinInfoViewModel
 import com.ssv.binchecker.presentation.viewModels.InitialViewModel
-import com.ssv.binchecker.presentation.viewModels.MainViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -21,9 +20,4 @@ interface ViewModelModule {
     @ViewModelKey(InitialViewModel::class)
     @Binds
     fun bindInitialViewModel(impl: InitialViewModel): ViewModel
-
-    @IntoMap
-    @ViewModelKey(MainViewModel::class)
-    @Binds
-    fun bindMainViewModel(impl: MainViewModel): ViewModel
 }

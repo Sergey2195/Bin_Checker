@@ -3,7 +3,6 @@ package com.ssv.binchecker.presentation.fragments
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,10 +26,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+/***
+ * Starting Fragment
+ */
 
 class InitialFragment : Fragment() {
 
     private lateinit var binding: FragmentInitialBinding
+    private lateinit var adapter: BinHistoryAdapter
 
     @Inject
     lateinit var viewModelFactory: ViewModelsFactory
@@ -38,7 +41,6 @@ class InitialFragment : Fragment() {
     private val viewModel by lazy {
         ViewModelProvider(this, viewModelFactory)[InitialViewModel::class.java]
     }
-    private lateinit var adapter: BinHistoryAdapter
 
     private val component by lazy {
         ((requireActivity().application) as BinApp).component
@@ -65,21 +67,19 @@ class InitialFragment : Fragment() {
         loadingState(false)
     }
 
-    private fun setupKeyboardClickListener() {
-        binding.inputEditText.setOnEditorActionListener { v, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH){
-                nextButtonClicked()
-                return@setOnEditorActionListener true
-            }else{
-                return@setOnEditorActionListener false
-            }
+    //settings clickListeners
+    private fun setupClickListeners() {
+        binding.nextButton.setOnClickListener {
+            nextButtonClicked()
         }
     }
 
+    //setup RecyclerView and it clickListeners
     private fun setupRecyclerView() {
         adapter = BinHistoryAdapter()
         binding.historyRv.adapter = adapter
-        binding.historyRv.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.historyRv.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         loadHistory()
         adapter.clickListener = {
             binding.inputEditText.setText(it.id)
@@ -87,69 +87,90 @@ class InitialFragment : Fragment() {
         }
     }
 
-    private fun loadHistory(){
-        lifecycleScope.launch(Dispatchers.IO){
+    //assigning a search button listener on the keyboard
+    private fun setupKeyboardClickListener() {
+        binding.inputEditText.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                nextButtonClicked()
+                return@setOnEditorActionListener true
+            } else {
+                return@setOnEditorActionListener false
+            }
+        }
+    }
+
+    //loading history of requests and submit it to recyclerView
+    private fun loadHistory() {
+        lifecycleScope.launch(Dispatchers.IO) {
             val list = viewModel.loadHistory()
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 adapter.submitList(list)
             }
         }
     }
 
-    private fun checkResult(res: BinState){
-        when (res){
+    //checking result when button is clicked
+    private fun checkResult(res: BinState) {
+        when (res) {
             is BinSuccess -> startSecondFragment(res)
             is BinFailure -> showError(res)
             is BinLoading -> loadingState(true)
-            is BinInitial-> return
+            is BinInitial -> return
         }
     }
 
-    private fun loadingState(isLoading: Boolean){
+    //if isLoadingState-> show progressBar, else->show all views
+    private fun loadingState(isLoading: Boolean) {
         binding.progress.isVisible = isLoading
         binding.nextButton.isVisible = !isLoading
         binding.inputEditText.isVisible = !isLoading
+        binding.historyRv.isVisible = !isLoading
     }
 
-    private fun showError(binFailure: BinFailure){
+    //show snackbar with text of error
+    private fun showError(binFailure: BinFailure) {
         val text = requireContext().getText(viewModel.showError(binFailure))
         Snackbar.make(requireView(), text, Snackbar.LENGTH_LONG).show()
         loadingState(false)
     }
 
-    private fun startSecondFragment(state: BinSuccess){
+    //starting nextFragment with Bin Information
+    private fun startSecondFragment(state: BinSuccess) {
         viewModel.clearFlow()
         val binNumber = binding.inputEditText.text.toString()
         requireActivity().supportFragmentManager.beginTransaction()
             .addToBackStack(null)
-            .replace(R.id.mainFragmentContainer, BinInfoFragment.newInstance(state.binInfo, binNumber))
+            .replace(
+                R.id.mainFragmentContainer,
+                BinInfoFragment.newInstance(state.binInfo, binNumber)
+            )
             .commit()
     }
 
+    //hide keyboard when starting new fragment
     private fun hideKeyboardFrom(context: Context, view: View) {
         val imm: InputMethodManager =
             context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private fun setupClickListeners() {
-        binding.nextButton.setOnClickListener {
-            nextButtonClicked()
-        }
-    }
-    private fun nextButtonClicked(){
+    //when next button clicked send bin to ViewModel, hide keyboard, collecting information about BIN and check result
+    private fun nextButtonClicked() {
         val text = binding.inputEditText.text.toString()
         sendToViewModel(text)
         hideKeyboardFrom(requireContext(), requireView())
         lifecycleScope.launch {
-            viewModel.getInfoFlow().collect() {
+            viewModel.getInfoFlow().collect {
                 checkResult(it)
             }
         }
     }
 
+    //send to viewModel
     private fun sendToViewModel(str: String) {
-        viewModel.sendBin(str)
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.sendBin(str)
+        }
     }
 
     companion object {

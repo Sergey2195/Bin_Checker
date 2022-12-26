@@ -23,6 +23,7 @@ class BinRepository @Inject constructor(
 
     private val infoMutableStateFlow: MutableStateFlow<BinState> = MutableStateFlow(BinInitial)
 
+    //when a BIN arrives, it is checked if there is one in the database, if not, then a request is sent, if it is, then information from the database is sent
     override suspend fun loadBinInfo(bin: BinSource) {
         val checkFromDb = checkBin(bin)
         if (checkFromDb != null) {

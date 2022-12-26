@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Bin Checker</string>
-    <string name="notFounded">Not founded</string>
+    <string name="notFounded">Not found</string>
     <string name="connectionError">Connection Error</string>
 </resources>
