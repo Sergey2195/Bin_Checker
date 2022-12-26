@@ -14,6 +14,7 @@ https://user-images.githubusercontent.com/87987521/209540750-f6e1a674-2065-4fdc-
 ## При нажатии на координаты открывается приложение карты
 
 https://user-images.githubusercontent.com/87987521/209541016-5b827a77-3e1f-4ccc-89dc-381f90d22a87.mov
+
 https://user-images.githubusercontent.com/87987521/209542963-1efad8cf-308c-4e6e-8127-e1e4574455de.mov
 
 
